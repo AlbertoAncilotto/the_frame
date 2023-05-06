@@ -12,7 +12,7 @@ from queue import Queue
 
 
 class StarryNightSnap:
-    def __init__(self, height=480, width=320, cam=None, window_name=None, static_bg=None, invert_drawing=False, preserve_color=True):
+    def __init__(self, height=480, width=320, cam=None, window_name=None, style_model='style_transfer/color_starry_300x480.onnx', style_w=300, style_h=480, static_bg=None, static_fg=None, invert_drawing=False, preserve_color=True):
         self.width = width
         self.heigth = height
 
@@ -22,38 +22,44 @@ class StarryNightSnap:
         self.people_seg = SegmentationModel()
         self.drawing_model = SketchModel()
         self.preserve_color=preserve_color
-        if static_bg is None:
-            self.style_model = StyleTransfer('style_transfer/color_starry_300x480.onnx', preserve_color=self.preserve_color, alpha=0.5)
+        if static_bg is None and static_fg is None:
+            self.style_model = StyleTransfer(style_model, width=style_w, height=style_h, preserve_color=self.preserve_color, alpha=0.5)
             self.background = None
+            self.foreground = None
         else:
-            self.background = cv2.resize(static_bg, (self.width, self.heigth))
+            self.background = cv2.resize(static_bg, (self.width, self.heigth)) if static_bg is not None else None
+            self.foreground = cv2.resize(static_fg, (self.width, self.heigth)) if static_fg is not None else None
         self.invert_drawing = invert_drawing
         self.snap_camera = SnapCamera()
     
     def starry_night_snap(self):
         
-        key = cv2.waitKey(1) & 0xFF
-        while not key == ord('p'):
-            frame = self.cam.get_frame()
-            cv2.imshow(self.window_name,frame)
-            key = cv2.waitKey(1) & 0xFF
+        # key = cv2.waitKey(1) & 0xFF
+        # while not key == ord('p'):
+        #     frame = self.cam.get_frame()
+        #     cv2.imshow(self.window_name,frame)
+        #     key = cv2.waitKey(1) & 0xFF
 
         seconds_left = self.snap_camera.start_snap()
         while seconds_left > 0:
             frame = self.cam.get_frame()
             display_frame, seconds_left = self.snap_camera.snap(frame.copy())
-            print(seconds_left)
+            #print(seconds_left)
             cv2.imshow(self.window_name,display_frame)
             cv2.waitKey(1)
 
         print('starting inference')
-        if self.background is None:
+        if self.background is None and self.foreground is None:
             segment_map = self.people_seg.segment(frame.copy())
+            # cv2.imshow('frame', frame)
             styled_frame = self.style_model.transfer_style(frame.copy(), seg_map=segment_map)
+            # cv2.imshow('styled_frame', styled_frame)
+            # cv2.waitKey()
         else:
             segment_map = self.people_seg.segment(frame.copy())
-            styled_frame = self.background
-            styled_frame = transfer_color(frame.copy(), styled_frame, segment_map, alpha=0.5)
+            styled_frame = self.background if self.foreground is None else self.people_seg.apply(self.foreground, self.background)
+            if self.preserve_color:
+                styled_frame = transfer_color(frame.copy(), styled_frame, segment_map, alpha=0.5)
 
         result_queue = Queue()
         frames_queue = Queue()

@@ -27,11 +27,11 @@ class StyleTransfer:
         generated_tensor = self.ort_session.run([self.output_name], {self.input_name: content_tensor})[0]
         generated_image = generated_tensor.squeeze()
         generated_image = generated_image.transpose(1, 2, 0)
+        generated_image = (generated_image*255).astype(np.uint8)
 
         if self.preserve_color:
             generated_image = utils.transfer_color(img, generated_image, mask=seg_map, alpha=self.alpha)
 
-        out_frame = (generated_image*255).astype(np.uint8)
-        out_frame = cv2.resize(out_frame,(width, height))
+        out_frame = cv2.resize(generated_image,(width, height))
 
         return out_frame

@@ -103,7 +103,7 @@ class WarholMonroeSnap:
         while seconds_left > 0:
             frame = self.cam.get_frame()
             display_frame, seconds_left = self.snap_camera.snap(frame.copy())
-            print(seconds_left)
+            #print(seconds_left)
             cv2.imshow(self.window_name,display_frame)
             cv2.waitKey(1)
 

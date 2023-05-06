@@ -35,20 +35,20 @@ class MunchScreamSnap:
         out_frame = (frame*segment_map + self.background*(1-segment_map)).astype(np.uint8)
         return out_frame
     
-    def starry_night_snap(self):
+    def munch_scream_snap(self):
         
-        key = cv2.waitKey(1) & 0xFF
-        while not key == ord('p'):
-            frame = self.cam.get_frame()
-            cv2.imshow(self.window_name,frame)
-            key = cv2.waitKey(1) & 0xFF
+        # key = cv2.waitKey(1) & 0xFF
+        # while not key == ord('p'):
+        #     frame = self.cam.get_frame()
+        #     cv2.imshow(self.window_name,frame)
+        #     key = cv2.waitKey(1) & 0xFF
 
         seconds_left = self.snap_camera.start_snap()
         while seconds_left > 0:
             frame = self.cam.get_frame()
             frame = self.frame_process(frame)
             display_frame, seconds_left = self.snap_camera.snap(frame.copy())
-            print(seconds_left)
+            #print(seconds_left)
             cv2.imshow(self.window_name,display_frame)
             cv2.waitKey(1)
 
@@ -107,4 +107,4 @@ class MunchScreamSnap:
 
 if __name__=='__main__':
     sn = MunchScreamSnap()
-    sn.starry_night_snap()
+    sn.munch_scream_snap()
