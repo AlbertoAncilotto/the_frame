@@ -9,12 +9,14 @@ import numpy as np
 import threading
 from queue import Queue
 from skimage import exposure
+from keypad import GPIOPinReader
 
 
 class FaceReplace:
     def __init__(self, height=480, width=320, cam=None, window_name=None, static_bg=None, face_area=None, style_path=None, softer_mask = 'resources/mask.jpg'):
         self.width = width
         self.heigth = height
+        self.gpio = GPIOPinReader()
 
         self.cam = Camera('cv2', self.width, self.heigth) if cam is None else cam
         self.window_name = window_name
@@ -61,13 +63,14 @@ class FaceReplace:
             cv2.imshow(self.window_name,display_frame)
             cv2.waitKey(1)
         print('starting inference')
-
-        while cv2.waitKey(1) == -1:
+        # print(self.gpio.waitKey(1))
+        while self.gpio.waitKey(1) == -1:
             frame = self.cam.get_frame() 
             boxes = self.face_det.find_single_face(frame)
             try:
                 styled_frame= self.merge_images(boxes, frame, self.softer_mask)
-            except:
+            except Exception as e:
+                print(e)
                 continue
 
             styled_frame = cv2.resize(styled_frame, (self.width, self.heigth))
@@ -83,7 +86,7 @@ class FaceReplace:
             crop =  self.style_model.transfer_style(crop)
         bg_crop = self.background[self.face_area[1]:self.face_area[3], self.face_area[0]:self.face_area[2]]
         
-        crop = exposure.match_histograms(crop, bg_crop, multichannel=True)
+        crop = exposure.match_histograms(crop, bg_crop, channel_axis=2)
 
         self.people_seg.segment(crop)
         crop = self.people_seg.apply(crop, bg_crop)

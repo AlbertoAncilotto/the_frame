@@ -18,9 +18,9 @@ class Camera:
             self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, self.height)
         elif self.library == 'picamera':
             self.picam2 = Picamera2()
-            self.picam2.configure(self.picam2.create_preview_configuration(main={"format": 'RGB888', "size": (height, width)}))
+            self.picam2.configure(self.picam2.create_preview_configuration(main={"format": 'RGB888', "size": (height*2, width*2)}))
             self.picam2.start()
-            print('TODO: TEST IF RGB OR BGR WITH PICAMERA')
+            # print('TODO: TEST IF RGB OR BGR WITH PICAMERA')
 
     def get_frame(self):
         if self.library == 'cv2':
@@ -38,6 +38,7 @@ class Camera:
             try:
                 frame = self.picam2.capture_array()
                 frame = cv2.rotate(frame, cv2.ROTATE_90_CLOCKWISE)
+                frame = cv2.resize(frame, (self.width, self.height))
                 frame = cv2.flip(frame, 1)
                 return frame
             except Exception as e:

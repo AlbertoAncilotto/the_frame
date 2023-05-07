@@ -9,12 +9,13 @@ import cv2
 import numpy as np
 import threading
 from queue import Queue
-
+from keypad import GPIOPinReader
 
 class MunchScreamSnap:
     def __init__(self, height=480, width=320, cam=None, window_name=None, invert_drawing=False, bg_path='resources/munch_scream_bg.jpg', preserve_color=True):
         self.width = width
         self.heigth = height
+        self.gpio = GPIOPinReader()
 
         self.cam = Camera('cv2', self.width, self.heigth) if cam is None else cam
         self.window_name = window_name
@@ -95,7 +96,7 @@ class MunchScreamSnap:
         out_morpher.animate(window_name=self.window_name)
 
         cv2.imshow(self.window_name, out_frame)
-        cv2.waitKey(10000)
+        self.gpio.waitKey(10000)
     
     def threading_compute_images(self, frame, result_queue):
         drawing = self.drawing_model.transfer_style(frame.copy())

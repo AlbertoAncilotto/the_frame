@@ -3,10 +3,10 @@ try:
     emulation=False
 except:
     print('RPi.GPIO not available, simulating with U I O P')
-    import cv2
     emulation=True
 import time
 import os
+import cv2
 
 class GPIOPinReader:
     def __init__(self, shutdown_delay=5):
@@ -48,9 +48,18 @@ class GPIOPinReader:
 
         return -1
     
-    def waitKey(self, delay):
-        cv2.waitKey(delay)
-        return self.read_pins()
+    def waitKey(self, delay=-1):
+        start = time.time()
+        cv2.waitKey(1)
+        key = self.read_pins()
+        if key != -1:
+            return key
+        while (time.time() - start)*1000 < delay or delay<0:
+            time.sleep(0.001)
+            key = self.read_pins()
+            if key != -1:
+                return key
+        return -1
 
 if __name__=='__main__':
     pin_reader = GPIOPinReader()

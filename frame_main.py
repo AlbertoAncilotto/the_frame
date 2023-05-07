@@ -10,9 +10,9 @@ from e01_warhol_monroe import WarholMonroeSnap
 from e02_munch_scream import MunchScreamSnap
 from e03_face_replace import FaceReplace
 
-cv2.namedWindow('out')
-# cv2.namedWindow('out', cv2.WND_PROP_FULLSCREEN)
-# cv2.setWindowProperty('out',cv2.WND_PROP_FULLSCREEN,cv2.WINDOW_FULLSCREEN)
+# cv2.namedWindow('out')
+cv2.namedWindow('out', cv2.WND_PROP_FULLSCREEN)
+cv2.setWindowProperty('out',cv2.WND_PROP_FULLSCREEN,cv2.WINDOW_FULLSCREEN)
 
 if __name__=='__main__':
     cam = Camera(None, 320, 480)
@@ -29,7 +29,6 @@ if __name__=='__main__':
 
     effects = [[sn1.starry_night_snap, sn2.starry_night_snap],[wm.monroe_snap, ms.munch_scream_snap],[fr1.face_replace_snap, fr2.face_replace_snap]]
     selected = [0,0,0]
-    # sn.starry_night_snap()
 
     while True:
         frame = cam.get_frame()
@@ -38,6 +37,8 @@ if __name__=='__main__':
 
         if key in [0,1,2]:
             effects[key][selected[key]]()
+            while gpio.waitKey(1)!= -1:
+                cv2.waitKey(50)
             selected[key]+=1
             selected[key]%=len(effects[key])
             print(selected)
