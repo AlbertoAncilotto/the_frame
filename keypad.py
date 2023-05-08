@@ -37,7 +37,6 @@ class GPIOPinReader:
                     return pin_id
             else:
                 ret = cv2.waitKey(1)
-                print(ret)
                 pin_assignments = { ord('u'):0, 
                                     ord('i'):1, 
                                     ord('o'):2,

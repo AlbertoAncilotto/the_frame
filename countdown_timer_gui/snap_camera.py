@@ -2,7 +2,7 @@ import cv2
 import time
 
 class SnapCamera:
-    def __init__(self):
+    def __init__(self, countdown_duration=3):
 
         # Define font and colors for countdown timer
         self.font = cv2.FONT_HERSHEY_DUPLEX
@@ -11,7 +11,7 @@ class SnapCamera:
         self.color = (255, 255, 255)
 
         # Define duration of countdown timer and flash
-        self.countdown_duration = 3  # seconds
+        self.countdown_duration = countdown_duration  # seconds
 
         # Initialize timer and flag for countdown and flash
         self.timer_start = None
