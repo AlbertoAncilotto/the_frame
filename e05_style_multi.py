@@ -34,6 +34,7 @@ class StyleMultiSnap:
                             StyleTransfer('style_transfer/color_starry_300x480.onnx', width=300, height=480, preserve_color=True),
                             StyleTransfer('style_transfer/matisse_450x720.onnx', width=450, height=720, preserve_color=False),
                             StyleTransfer('style_transfer/afremov_450x720.onnx', width=450, height=720, preserve_color=False),
+                            StyleTransfer('style_transfer/flat_450x720.onnx', width=450, height=720, preserve_color=True, alpha=0.75),
                             SketchModel(width=480, heigth=720),
                             ]
     
@@ -70,16 +71,17 @@ class StyleMultiSnap:
                     drawing = styled_frames[-1]
                     bg = cv2.resize(cv2.imread('resources/papyrus.jpg'), (drawing.shape[1], drawing.shape[0]))
                     styled_frames[-1] = np.minimum(drawing, bg)
-                    styled_frames[-2] = np.maximum(cv2.bitwise_not(drawing), styled_frames[-2])
+                    styled_frames[-2] =  np.minimum(drawing, styled_frames[-2]) #np.maximum(cv2.bitwise_not(drawing), styled_frames[-2])
+                    styled_frames[-3] =  np.minimum(drawing, styled_frames[-3]) 
 
             frame_id%=len(styled_frames)
             styled_frame = styled_frames[frame_id]
             frame_id+=1
-            im = ImageMorpher(curr_frame, styled_frame, 20)
+            im = ImageMorpher(curr_frame, styled_frame, 40)
             curr_frame = styled_frame
-            im.animate(self.window_name, delay_ms=30)
+            im.animate(self.window_name, delay_ms=35)
             cv2.imshow(self.window_name, styled_frame)
-            ret = self.gpio.waitKey()
+            ret = self.gpio.waitKey(2000)
             if ret == 2:
                 break
 
