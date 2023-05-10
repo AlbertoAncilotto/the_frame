@@ -82,16 +82,21 @@ class FaceReplaceMulti:
     def merge_images(self, boxes, frame, softer_mask=None, im_id=0):
         crop_size = (self.face_areas[im_id][2]-self.face_areas[im_id][0], self.face_areas[im_id][3]-self.face_areas[im_id][1])
         box = boxes[0]
-        crop = frame[box[1]:box[3], box[0]:box[2]]
+        if im_id==4:
+            crop = cv2.imread('doggo_R.png') #frame[box[1]:box[3], box[0]:box[2]]
+        elif im_id ==2:
+            crop = cv2.flip(cv2.imread('doggo_R.png'), 1)
+        else:
+            crop = cv2.imread('doggo.png') 
         crop = cv2.resize(crop, crop_size)
 
         bg_crop = self.backgrounds[im_id][self.face_areas[im_id][1]:self.face_areas[im_id][3], self.face_areas[im_id][0]:self.face_areas[im_id][2]]
         bg_crop_nf = self.backgrounds_nf[im_id][self.face_areas[im_id][1]:self.face_areas[im_id][3], self.face_areas[im_id][0]:self.face_areas[im_id][2]]
         
-        crop = exposure.match_histograms(crop, bg_crop, multichannel=True)
+        # crop = exposure.match_histograms(crop, bg_crop, multichannel=True)
 
         self.people_seg.segment(crop)
-        crop = self.people_seg.apply(crop, bg_crop_nf)
+        # crop = self.people_seg.apply(crop, bg_crop_nf)
         styled_frame = self.backgrounds_nf[im_id].copy()
         
         if softer_mask is not None:
