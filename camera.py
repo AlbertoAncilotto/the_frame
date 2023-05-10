@@ -7,7 +7,7 @@ except:
     print('Picamera2 not available')
 
 class Camera:
-    def __init__(self, library, width, height):
+    def __init__(self, library, width, height, unzoom=2):
         self.width = width
         self.height = height
         self.library = auto_library
@@ -18,9 +18,11 @@ class Camera:
             self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, self.height)
         elif self.library == 'picamera':
             self.picam2 = Picamera2()
-            self.picam2.configure(self.picam2.create_preview_configuration(main={"format": 'RGB888', "size": (height*2, width*2)}))
+            self.picam2.configure(self.picam2.create_preview_configuration(main={"format": 'RGB888', "size": (height*unzoom, width*unzoom)}))
             self.picam2.start()
             # print('TODO: TEST IF RGB OR BGR WITH PICAMERA')
+
+    
 
     def get_frame(self):
         if self.library == 'cv2':

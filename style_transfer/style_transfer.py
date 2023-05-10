@@ -4,7 +4,7 @@ import onnxruntime as ort
 import style_transfer.utils as utils # assuming this module contains a transfer_color function
 
 class StyleTransfer:
-    def __init__(self, model_path= 'style_transfer/brush_300x480.onnx', height = 480, width = 300, preserve_color = True, alpha=1.0):
+    def __init__(self, model_path= 'style_transfer/brush_300x480.onnx', height = 480, width = 300, preserve_color = True, alpha=1.0, invert_segmap=False, segmap_to_gray=False):
 
         self.ort_session = ort.InferenceSession(model_path)
         self.input_name = self.ort_session.get_inputs()[0].name
@@ -14,6 +14,8 @@ class StyleTransfer:
         self.width = width
         self.alpha = alpha
         self.added_noise =(np.random.rand(self.height, self.width, 3).astype(np.float32)-0.5)*10
+        self.invert_segmap = invert_segmap
+        self.segmap_to_gray = segmap_to_gray
 
     def transfer_style(self, frame: np.ndarray, seg_map: np.ndarray = None) -> np.ndarray:
         height, width, _ = frame.shape
@@ -30,7 +32,7 @@ class StyleTransfer:
         generated_image = (generated_image*255).astype(np.uint8)
 
         if self.preserve_color:
-            generated_image = utils.transfer_color(img, generated_image, mask=seg_map, alpha=self.alpha)
+            generated_image = utils.transfer_color(img, generated_image, mask=seg_map, alpha=self.alpha, invert_mask=self.invert_segmap, src_to_grayscale=self.segmap_to_gray)
 
         out_frame = cv2.resize(generated_image,(width, height))
 

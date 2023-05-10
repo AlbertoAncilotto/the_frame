@@ -11,38 +11,30 @@ from queue import Queue
 from skimage import exposure
 
 
-class FaceReplace:
-    def __init__(self, height=480, width=320, cam=None, window_name=None, static_bg=None, face_area=None, style_path=None, softer_mask = 'resources/mask.jpg'):
+class FaceReplaceMulti:
+    def __init__(self, height=480, width=320, cam=None, window_name=None, softer_mask = 'resources/mask.jpg'):
         self.width = width
         self.heigth = height
 
         self.cam = Camera('cv2', self.width, self.heigth) if cam is None else cam
         self.window_name = window_name
-        self.background = cv2.resize(cv2.imread(static_bg), (self.width, self.heigth))
 
         self.people_seg = SegmentationModel()
         self.face_det = FaceDetector()
-        if style_path is not None:
-            self.style_model = StyleTransfer(style_path, height=200, width=200, preserve_color=True)
-        else:
-            self.style_model = None
         self.snap_camera = SnapCamera()
 
         self.softer_mask = cv2.imread(softer_mask)/255.0
 
-        if face_area is None:
-            boxes = self.face_det.find_single_face(self.background)
-            print(boxes[0])
-            self.face_area = boxes[0]
-            # self.face_det.draw_bounding_boxes(self.background, boxes)
-            # cv2.imshow('face',self.background)
-            # cv2.waitKey()
-        else:
-            self.face_area =[int(face_area[0]*width),
-                             int(face_area[1]*height),
-                             int(face_area[2]*width),
-                             int(face_area[3]*height)]
-    
+        backgrounds = ['resources/mona_lisa.jpg'
+                            
+                            ]
+        
+        self.face_areas = [
+                            [0.27, 0.145, 0.61, 0.55]
+                            ]
+        
+        self.backgrounds = [cv2.resize(cv2.imread(bg), (self.width, self.heigth)) for bg in backgrounds]
+
     def face_replace_snap(self):
         
         # key = cv2.waitKey(1) & 0xFF

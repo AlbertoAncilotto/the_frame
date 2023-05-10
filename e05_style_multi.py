@@ -16,7 +16,7 @@ import copy
 
 
 class StyleMultiSnap:
-    def __init__(self, height=480, width=320, cam=None, window_name=None):
+    def __init__(self, height=480, width=320, cam=None, window_name=None, focus_face=False):
         self.width = width
         self.heigth = height
         self.gpio = GPIOPinReader()
@@ -25,6 +25,7 @@ class StyleMultiSnap:
         self.window_name = window_name
 
         self.people_seg = SegmentationModel()
+        self.focus_face = focus_face
         self.face_det = FaceDetector()
         self.drawing_model = SketchModel()
         self.snap_camera = SnapCamera()
@@ -34,18 +35,32 @@ class StyleMultiSnap:
                             StyleTransfer('style_transfer/color_starry_300x480.onnx', width=300, height=480, preserve_color=True),
                             StyleTransfer('style_transfer/matisse_450x720.onnx', width=450, height=720, preserve_color=False),
                             StyleTransfer('style_transfer/afremov_450x720.onnx', width=450, height=720, preserve_color=False),
-                            StyleTransfer('style_transfer/flat_450x720.onnx', width=450, height=720, preserve_color=True, alpha=0.75),
+                            StyleTransfer('style_transfer/flat_450x720.onnx', width=450, height=720, preserve_color=True, segmap_to_gray=True),
+                            StyleTransfer('style_transfer/afremov_450x720.onnx', width=450, height=720, preserve_color=True, invert_segmap=True, segmap_to_gray=True),
                             SketchModel(width=480, heigth=720),
                             ]
     
-    def multi_snap(self, cd=3):
+    def multi_snap(self):
         seconds_left = self.snap_camera.start_snap()
         while seconds_left > 0:
             frame = self.cam.get_frame()
+            if self.focus_face:
+                boxes = self.face_det.find_single_face(frame)
+                self.face_det.draw_bounding_boxes(frame, boxes, color=(255,200,0))
             display_frame, seconds_left = self.snap_camera.snap(frame.copy())
+
             #print(seconds_left)
             cv2.imshow(self.window_name,display_frame)
             cv2.waitKey(1)
+        
+        if self.focus_face:
+            try:
+                frame = self.cam.get_frame()
+                boxes = self.face_det.find_single_face(frame)
+                frame = self.face_det.get_crops(boxes, frame, self.width, self.heigth, zoom=0.65)[0]
+            except:
+                frame = self.cam.get_frame()
+
 
         print('starting inference')
         self.seg_map = self.people_seg.segment(frame)
@@ -73,6 +88,7 @@ class StyleMultiSnap:
                     styled_frames[-1] = np.minimum(drawing, bg)
                     styled_frames[-2] =  np.minimum(drawing, styled_frames[-2]) #np.maximum(cv2.bitwise_not(drawing), styled_frames[-2])
                     styled_frames[-3] =  np.minimum(drawing, styled_frames[-3]) 
+                    styled_frames[-4] =  np.minimum(drawing, styled_frames[-4]) 
 
             frame_id%=len(styled_frames)
             styled_frame = styled_frames[frame_id]
@@ -100,5 +116,5 @@ class StyleMultiSnap:
 
 
 if __name__=='__main__':
-    sn = StyleMultiSnap(window_name='out')
+    sn = StyleMultiSnap(window_name='out', focus_face=True)
     sn.multi_snap()

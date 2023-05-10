@@ -3,7 +3,6 @@ import numpy as np
 
 from camera import Camera
 from keypad import GPIOPinReader
-from style_transfer.style_transfer import StyleTransfer
 
 from e00_starry_night import StarryNightSnap
 from e01_warhol_monroe import WarholMonroeSnap
