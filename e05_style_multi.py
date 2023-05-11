@@ -32,7 +32,7 @@ class StyleMultiSnap:
         self.style_models =[
                             StyleTransfer('style_transfer/pencil_450x720.onnx', width=450, height=720, preserve_color=False),
                             StyleTransfer('style_transfer/pen_450x720.onnx', width=450, height=720, preserve_color=False),
-                            StyleTransfer('style_transfer/color_starry_300x480.onnx', width=300, height=480, preserve_color=True),
+                            StyleTransfer('style_transfer/color_starry_300x480.onnx', width=300, height=480, preserve_color=True, invert_segmap=True, segmap_to_gray=True),
                             StyleTransfer('style_transfer/matisse_450x720.onnx', width=450, height=720, preserve_color=False),
                             StyleTransfer('style_transfer/afremov_450x720.onnx', width=450, height=720, preserve_color=False),
                             StyleTransfer('style_transfer/flat_450x720.onnx', width=450, height=720, preserve_color=True, segmap_to_gray=True),
@@ -98,7 +98,7 @@ class StyleMultiSnap:
             im.animate(self.window_name, delay_ms=35)
             cv2.imshow(self.window_name, styled_frame)
             ret = self.gpio.waitKey(2000)
-            if ret == 2:
+            if ret == 1 or ret == 2:
                 break
 
 

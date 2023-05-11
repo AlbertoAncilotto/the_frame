@@ -4,6 +4,7 @@ from style_transfer.style_transfer import StyleTransfer
 from countdown_timer_gui.snap_camera import SnapCamera
 from face_detection.face_detector import FaceDetector
 from transition.image_morpher import ImageMorpher
+from keypad import GPIOPinReader
 import cv2
 import numpy as np
 import threading
@@ -15,6 +16,7 @@ class FaceReplaceMulti:
     def __init__(self, height=480, width=320, cam=None, window_name=None, softer_mask = 'resources/mask.jpg'):
         self.width = width
         self.heigth = height
+        self.gpio = GPIOPinReader()
 
         self.cam = Camera('cv2', self.width, self.heigth) if cam is None else cam
         self.window_name = window_name
@@ -74,9 +76,12 @@ class FaceReplaceMulti:
 
             styled_frame = cv2.resize(styled_frame, (self.width, self.heigth))
             cv2.imshow(self.window_name, styled_frame)
-            if cv2.waitKey(1) != -1:
+            key = self.gpio.waitKey(1)
+            if key == 0:
                 im_id +=1
                 im_id%= len(self.backgrounds)
+            elif key != -1:
+                return
 
 
     def merge_images(self, boxes, frame, softer_mask=None, im_id=0):
