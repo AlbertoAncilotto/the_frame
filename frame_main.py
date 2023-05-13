@@ -10,6 +10,7 @@ from e02_munch_scream import MunchScreamSnap
 from e03_face_replace import FaceReplace
 from e04_face_replace_multi import FaceReplaceMulti
 from e05_style_multi import StyleMultiSnap
+from e06_memes import MemesReel
 
 cv2.namedWindow('out')
 # cv2.namedWindow('out', cv2.WND_PROP_FULLSCREEN)
@@ -28,9 +29,10 @@ if __name__=='__main__':
     wm = WarholMonroeSnap(cam=cam, window_name='out')
     ms = MunchScreamSnap(cam=cam, window_name='out')
     fr1 = FaceReplace(cam=cam, window_name='out', static_bg='resources/mona_lisa.png', face_area=[0.27, 0.145, 0.61, 0.55])
+    reel = MemesReel(window_name='out')
 
-    effect_names = ['style multi', 'style multi F', 'face multi', 'starry clone', 'starry night', 'starry night 2', 'warhol', 'munch', 'mona lisa']
-    effects = [sm.multi_snap, sm_face.multi_snap, fm.face_replace_snap, sn1.starry_night_snap, sn2.starry_night_snap, sn3.starry_night_snap, wm.monroe_snap, ms.munch_scream_snap, fr1.face_replace_snap]
+    effect_names = ['style multi', 'style multi F', 'face multi', 'starry clone', 'starry night', 'starry night 2', 'warhol', 'munch', 'mona lisa', 'memes']
+    effects = [sm.multi_snap, sm_face.multi_snap, fm.face_replace_snap, sn1.starry_night_snap, sn2.starry_night_snap, sn3.starry_night_snap, wm.monroe_snap, ms.munch_scream_snap, fr1.face_replace_snap, reel.memes_reel]
     
     selected = 0
     text_duration = 0.5
@@ -57,4 +59,8 @@ if __name__=='__main__':
                 print(effect_names[selected])
         except Exception as e:
             print(e)
+            try:
+                reel.memes_reel()
+            except:
+                continue
             gpio.waitKey(50)
