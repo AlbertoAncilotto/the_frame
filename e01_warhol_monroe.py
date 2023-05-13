@@ -8,6 +8,7 @@ import numpy as np
 import threading
 from queue import Queue
 from keypad import GPIOPinReader
+from image_writer import ImageWriter
 
 class WarholMonroeSnap:
     def __init__(self, height=480, width=320, cam=None, window_name=None):
@@ -99,7 +100,7 @@ class WarholMonroeSnap:
         return res2
     
     def monroe_snap(self):
-
+        image_writer = ImageWriter()
         seconds_left = self.snap_camera.start_snap()
         while seconds_left > 0:
             frame = self.cam.get_frame()
@@ -108,6 +109,7 @@ class WarholMonroeSnap:
             cv2.imshow(self.window_name,display_frame)
             cv2.waitKey(1)
 
+        image_writer.save_image(frame)
         print('starting inference')
         boxes = self.face_det.find_single_face(frame.copy())
 
@@ -116,6 +118,7 @@ class WarholMonroeSnap:
         else:
             face_crop = cv2.resize(frame, (self.width//2, self.heigth//2))
         
+        image_writer.save_image(face_crop)
         # face_crop_segmented = (face_crop*segment_map).astype(np.uint8)
         face_crop_segmented = face_crop
         gray = cv2.cvtColor(face_crop_segmented, cv2.COLOR_BGR2GRAY)
@@ -171,6 +174,8 @@ class WarholMonroeSnap:
         out_morpher = ImageMorpher(out, out_frame, n_frames=20, transition='threshold')
         out_morpher.animate(window_name=self.window_name)
 
+        
+        image_writer.save_image(out_frame)
         cv2.imshow(self.window_name, out_frame)
         self.gpio.waitKey(10000)
     

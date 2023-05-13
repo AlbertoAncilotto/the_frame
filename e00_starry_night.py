@@ -10,6 +10,7 @@ import numpy as np
 import threading
 from queue import Queue
 from keypad import GPIOPinReader
+from image_writer import ImageWriter
 
 
 class StarryNightSnap:
@@ -42,6 +43,7 @@ class StarryNightSnap:
         #     cv2.imshow(self.window_name,frame)
         #     key = cv2.waitKey(1) & 0xFF
 
+        image_writer = ImageWriter()
         seconds_left = self.snap_camera.start_snap()
         while seconds_left > 0:
             frame = self.cam.get_frame()
@@ -50,6 +52,7 @@ class StarryNightSnap:
             cv2.imshow(self.window_name,display_frame)
             cv2.waitKey(1)
 
+        image_writer.save_image(frame)
         print('starting inference')
         if self.background is None and self.foreground is None:
             segment_map = self.people_seg.segment(frame.copy())
@@ -94,6 +97,8 @@ class StarryNightSnap:
         out_morpher = ImageMorpher(styled_frame, out_frame, n_frames=20)
         out_morpher.animate(window_name=self.window_name)
 
+        
+        image_writer.save_image(out_frame)
         cv2.imshow(self.window_name, out_frame)
         self.gpio.waitKey(10000)
     

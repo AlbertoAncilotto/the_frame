@@ -12,9 +12,9 @@ from e04_face_replace_multi import FaceReplaceMulti
 from e05_style_multi import StyleMultiSnap
 from e06_memes import MemesReel
 
-cv2.namedWindow('out')
-# cv2.namedWindow('out', cv2.WND_PROP_FULLSCREEN)
-# cv2.setWindowProperty('out',cv2.WND_PROP_FULLSCREEN,cv2.WINDOW_FULLSCREEN)
+# cv2.namedWindow('out')
+cv2.namedWindow('out', cv2.WND_PROP_FULLSCREEN)
+cv2.setWindowProperty('out',cv2.WND_PROP_FULLSCREEN,cv2.WINDOW_FULLSCREEN)
 
 if __name__=='__main__':
     cam = Camera(None, 320, 480)

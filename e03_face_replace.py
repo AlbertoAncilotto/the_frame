@@ -3,13 +3,11 @@ from segmentation.segment import SegmentationModel
 from style_transfer.style_transfer import StyleTransfer
 from countdown_timer_gui.snap_camera import SnapCamera
 from face_detection.face_detector import FaceDetector
-from transition.image_morpher import ImageMorpher
 import cv2
 import numpy as np
-import threading
-from queue import Queue
 from skimage import exposure
 from keypad import GPIOPinReader
+from image_writer import ImageWriter
 
 
 class FaceReplace:
@@ -47,12 +45,7 @@ class FaceReplace:
     
     def face_replace_snap(self):
         
-        # key = cv2.waitKey(1) & 0xFF
-        # while not key == ord('p'):
-        #     frame = self.cam.get_frame()
-        #     cv2.imshow(self.window_name,frame)
-        #     key = cv2.waitKey(1) & 0xFF
-
+        image_writer = ImageWriter()
         seconds_left = self.snap_camera.start_snap()
         while seconds_left > 0:
             frame = self.cam.get_frame()            
@@ -62,6 +55,7 @@ class FaceReplace:
             #print(seconds_left)
             cv2.imshow(self.window_name,display_frame)
             cv2.waitKey(1)
+        image_writer.save_image(frame)
         print('starting inference')
         # print(self.gpio.waitKey(1))
         while self.gpio.waitKey(1) == -1:

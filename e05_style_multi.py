@@ -12,7 +12,7 @@ import threading
 from queue import Queue
 from keypad import GPIOPinReader
 import time
-import copy
+from image_writer import ImageWriter
 
 
 class StyleMultiSnap:
@@ -41,6 +41,7 @@ class StyleMultiSnap:
                             ]
     
     def multi_snap(self):
+        image_writer = ImageWriter()
         seconds_left = self.snap_camera.start_snap()
         while seconds_left > 0:
             frame = self.cam.get_frame()
@@ -53,11 +54,13 @@ class StyleMultiSnap:
             cv2.imshow(self.window_name,display_frame)
             cv2.waitKey(1)
         
+        image_writer.save_image(frame)
         if self.focus_face:
             try:
                 frame = self.cam.get_frame()
                 boxes = self.face_det.find_single_face(frame)
                 frame = self.face_det.get_crops(boxes, frame, self.width, self.heigth, zoom=0.65)[0]
+                image_writer.save_image(frame)
             except:
                 frame = self.cam.get_frame()
 
@@ -81,7 +84,9 @@ class StyleMultiSnap:
         frame_id = 0
         while True:
             while not result_queue.empty():
-                styled_frames.append(result_queue.get())
+                styled_frame = result_queue.get()
+                styled_frames.append(styled_frame)
+                image_writer.save_image(styled_frame)
                 if len(styled_frames) == len(self.style_models):
                     drawing = styled_frames[-1]
                     bg = cv2.resize(cv2.imread('resources/papyrus.jpg'), (drawing.shape[1], drawing.shape[0]))

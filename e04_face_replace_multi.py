@@ -7,10 +7,9 @@ from transition.image_morpher import ImageMorpher
 from keypad import GPIOPinReader
 import cv2
 import numpy as np
-import threading
-from queue import Queue
 from skimage import exposure
 import os
+from image_writer import ImageWriter
 
 class FaceReplaceMulti:
     def __init__(self, height=480, width=320, cam=None, window_name=None, softer_mask = 'resources/mask.jpg'):
@@ -49,12 +48,7 @@ class FaceReplaceMulti:
 
     def face_replace_snap(self):
         
-        # key = cv2.waitKey(1) & 0xFF
-        # while not key == ord('p'):
-        #     frame = self.cam.get_frame()
-        #     cv2.imshow(self.window_name,frame)
-        #     key = cv2.waitKey(1) & 0xFF
-
+        image_writer = ImageWriter()
         seconds_left = self.snap_camera.start_snap()
         while seconds_left > 0:
             frame = self.cam.get_frame()            
@@ -65,6 +59,7 @@ class FaceReplaceMulti:
             cv2.imshow(self.window_name,display_frame)
             cv2.waitKey(1)
 
+        image_writer.save_image(frame)
         im_id = 0
         while True:
             frame = self.cam.get_frame() 
@@ -78,6 +73,7 @@ class FaceReplaceMulti:
             cv2.imshow(self.window_name, styled_frame)
             key = self.gpio.waitKey(1)
             if key == 0:
+                image_writer.save_image(styled_frame)
                 im_id +=1
                 im_id%= len(self.backgrounds)
             elif key != -1:
